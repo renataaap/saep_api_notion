@@ -34,15 +34,13 @@ O arquivo `railway.json` já configura build, inicialização do banco, start, h
 
 1. Crie um projeto no Railway e conecte este repositório.
 2. Adicione um serviço MySQL ao mesmo projeto.
-3. No serviço da aplicação, crie referências para as variáveis do MySQL:
+3. No serviço da aplicação, crie uma referência para a URL privada do MySQL:
 
 ```text
-MYSQLHOST=${{MySQL.MYSQLHOST}}
-MYSQLPORT=${{MySQL.MYSQLPORT}}
-MYSQLUSER=${{MySQL.MYSQLUSER}}
-MYSQLPASSWORD=${{MySQL.MYSQLPASSWORD}}
-MYSQLDATABASE=${{MySQL.MYSQLDATABASE}}
+MYSQL_URL=${{MySQL.MYSQL_URL}}
 ```
+
+Se o banco tiver outro nome, use o seletor de referências do Railway para escolher a variável `MYSQL_URL` do serviço correto.
 
 4. Gere um domínio público para o serviço da aplicação.
 
