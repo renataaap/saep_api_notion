@@ -76,6 +76,7 @@ export default function Home() {
     return (!search || text.includes(search.toLocaleLowerCase('pt-BR'))) && (!category || product.categoria === category);
   }), [products, search, category]);
   const emptyCount = products.filter(product => Number(product.quantidade) === 0).length;
+  const totalUnits = products.reduce((sum, product) => sum + Number(product.quantidade), 0);
   const totalValue = stock.reduce((sum, product) => sum + Number(product.valor_total), 0);
 
   function notify(text: string) {
@@ -106,6 +107,13 @@ export default function Home() {
       {tab === 'produtos' ? <>
         <div className="page-title"><div><h1>Produtos</h1><p>Consulte e atualize o estoque.</p></div><button className="primary-button" onClick={() => setEditing(null)}>Adicionar produto</button></div>
 
+        <section className="metrics" aria-label="Resumo do estoque">
+          <div><span>Produtos</span><strong>{number.format(products.length)}</strong><small>{categories.length} {categories.length === 1 ? 'categoria' : 'categorias'}</small></div>
+          <div><span>Unidades em estoque</span><strong>{number.format(totalUnits)}</strong><small>Quantidade disponível</small></div>
+          <div><span>Valor armazenado</span><strong>{money.format(totalValue)}</strong><small>Posição atual</small></div>
+          <div className={emptyCount ? 'metric-alert' : ''}><span>Sem estoque</span><strong>{number.format(emptyCount)}</strong><small>{emptyCount ? 'Precisam de reposição' : 'Nenhuma pendência'}</small></div>
+        </section>
+
         <section className="toolbar" aria-label="Filtros de produtos">
           <label className="search"><span className="sr-only">Buscar produto</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar por nome ou categoria..." /></label>
           <label><span className="sr-only">Categoria</span><select value={category} onChange={event => setCategory(event.target.value)}><option value="">Todas as categorias</option>{categories.map(item => <option key={item}>{item}</option>)}</select></label>
@@ -129,7 +137,7 @@ export default function Home() {
 
 function ProductTable({ products, onMove, onEdit, onDelete }: { products: Product[]; onMove: (product: Product, type: 'entrada' | 'saida') => void; onEdit: (product: Product) => void; onDelete: (product: Product) => void }) {
   if (!products.length) return <Empty title="Nenhum produto encontrado" text="Ajuste a busca ou adicione um produto." />;
-  return <div className="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th className="numeric">Quantidade</th><th className="numeric">Preço</th><th className="actions-heading">Ações</th></tr></thead><tbody>{products.map(product => <tr key={product.id}><td data-label="Produto"><strong>{product.nome}</strong></td><td data-label="Categoria">{product.categoria}</td><td data-label="Unidade">{product.unidade_medida}</td><td data-label="Quantidade" className={`numeric ${product.quantidade === 0 ? 'zero' : ''}`}>{number.format(product.quantidade)}</td><td data-label="Preço" className="numeric">{money.format(product.valor)}</td><td data-label="Ações"><div className="row-actions"><button onClick={() => onMove(product, 'entrada')}>Entrada</button><button onClick={() => onMove(product, 'saida')}>Saída</button><button onClick={() => onEdit(product)}>Editar</button><button className="delete" onClick={() => onDelete(product)}>Excluir</button></div></td></tr>)}</tbody></table></div>;
+  return <div className="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th className="numeric">Quantidade</th><th className="numeric">Preço</th><th>Status</th><th className="actions-heading">Ações</th></tr></thead><tbody>{products.map(product => <tr key={product.id}><td data-label="Produto"><strong>{product.nome}</strong></td><td data-label="Categoria">{product.categoria}</td><td data-label="Unidade">{product.unidade_medida}</td><td data-label="Quantidade" className={`numeric ${product.quantidade === 0 ? 'zero' : ''}`}>{number.format(product.quantidade)}</td><td data-label="Preço" className="numeric">{money.format(product.valor)}</td><td data-label="Status"><span className={product.quantidade ? 'status' : 'status status-empty'}>{product.quantidade ? 'Disponível' : 'Sem estoque'}</span></td><td data-label="Ações"><div className="row-actions"><button onClick={() => onMove(product, 'entrada')}>Entrada</button><button onClick={() => onMove(product, 'saida')}>Saída</button><button onClick={() => onEdit(product)}>Editar</button><button className="delete" onClick={() => onDelete(product)}>Excluir</button></div></td></tr>)}</tbody></table></div>;
 }
 
 function Reports({ categoryValues, outflows, movements }: { categoryValues: CategoryValue[]; outflows: Outflow[]; movements: Movement[] }) {

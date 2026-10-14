@@ -23,7 +23,10 @@ Blocked for the same reason. Table density, header alignment, typography, spacin
 
 ## Comparison history
 
-No visual iteration was possible because the implementation could not be captured in a browser.
+- First implementation: flat graphite-and-blue table matching the chosen direction.
+- User feedback: the result was too simple.
+- Second implementation: added a compact four-item stock summary, clearer page heading, meaningful stock-status labels, subtle surface depth and stronger table hierarchy while preserving the selected palette and simple structure.
+- No browser-rendered visual comparison was possible because the implementation could not be captured in this environment.
 
 ## Required follow-up
 
