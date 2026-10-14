@@ -2,23 +2,31 @@
   "name": "saep-api-estoque",
   "version": "2.0.0",
   "description": "API de estoque SAEP adaptada a documentacao do Notion",
-  "type": "commonjs",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "node --watch src/server.js",
+    "build": "next build",
+    "start": "cross-env NODE_ENV=production node src/server.js",
+    "db:init": "node scripts/init-db.js",
     "test": "node --test tests/*.test.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.9"
   },
   "dependencies": {
     "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mysql2": "^3.22.4"
+    "mysql2": "^3.22.4",
+    "next": "^16.4.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "typescript": "^5.9.3"
   }
 }

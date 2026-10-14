@@ -1,15 +1,24 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const criarRotasProdutos = require('./routes/produtos.routes');
 
-function criarApp(pool) {
+function criarApp(pool, opcoes = {}) {
+  const { nextHandler } = opcoes;
   const app = express();
   app.use(cors());
   app.use(express.json());
-  app.use('/app', express.static(path.join(__dirname, '..', 'public')));
 
-  app.get('/', (req, res) => {
+  app.get('/health', async (req, res) => {
+    try {
+      await pool.query('SELECT 1');
+      res.json({ status: 'ok' });
+    } catch (erro) {
+      res.status(503).json({ status: 'erro', banco: 'indisponível' });
+    }
+  });
+
+  app.get('/', (req, res, next) => {
+    if (nextHandler && req.accepts(['html', 'json']) === 'html') return nextHandler(req, res).catch(next);
     res.json({
       mensagem: 'API de Estoque SAEP funcionando',
       rotas: [
@@ -32,7 +41,8 @@ function criarApp(pool) {
 
   app.use('/produtos', criarRotasProdutos(pool));
 
-  app.use((req, res) => {
+  app.use((req, res, next) => {
+    if (nextHandler && req.accepts(['html', 'json']) === 'html') return nextHandler(req, res).catch(next);
     res.status(404).json({ erro: 'Rota não encontrada.' });
   });
 
