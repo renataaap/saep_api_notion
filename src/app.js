@@ -42,7 +42,7 @@ function criarApp(pool, opcoes = {}) {
   app.use('/produtos', criarRotasProdutos(pool));
 
   app.use((req, res, next) => {
-    if (nextHandler && req.accepts(['html', 'json']) === 'html') return nextHandler(req, res).catch(next);
+    if (nextHandler) return nextHandler(req, res).catch(next);
     res.status(404).json({ erro: 'Rota não encontrada.' });
   });
 
