@@ -1,0 +1,330 @@
+{
+  "info": {
+    "name": "SAEP - API Estoque Notion",
+    "description": "Requisições para testar o projeto de estoque conforme a documentação do Notion.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Verificar API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": []
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar produtos",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Consultar produto",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastrar produto",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{baseUrl}}/produtos",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos"
+          ]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Cabo USB-C\",\n  \"valor\": 25.9,\n  \"quantidade\": 30,\n  \"categoria\": \"Cabos\",\n  \"unidade_medida\": \"unidade\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Editar produto",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "1"
+          ]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Teclado mecânico\",\n  \"valor\": 150,\n  \"quantidade\": 20,\n  \"categoria\": \"Periféricos\",\n  \"unidade_medida\": \"unidade\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Registrar entrada",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/1/entrada",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "1",
+            "entrada"
+          ]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantidade\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Registrar saída",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/1/saida",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "1",
+            "saida"
+          ]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantidade\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Consultar estoque",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/estoque",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "estoque"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Valor por categoria",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/valor-total-categoria",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "valor-total-categoria"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Histórico de saídas",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/saidas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "saidas"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Limites de estoque",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/limites",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "limites"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Relatório movimentações",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/movimentacoes-periodo?dataInicial=2026-06-01&dataFinal=2026-06-30",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "movimentacoes-periodo"
+          ],
+          "query": [
+            {
+              "key": "dataInicial",
+              "value": "2026-06-01"
+            },
+            {
+              "key": "dataFinal",
+              "value": "2026-06-30"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Maiores saídas",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/maior-saida?dataInicial=2026-06-01&dataFinal=2026-06-30",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "maior-saida"
+          ],
+          "query": [
+            {
+              "key": "dataInicial",
+              "value": "2026-06-01"
+            },
+            {
+              "key": "dataFinal",
+              "value": "2026-06-30"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Excluir produto",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/produtos/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "produtos",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
