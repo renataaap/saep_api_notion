@@ -7,7 +7,8 @@ type Stock = Product & { valor_total: number };
 type Movement = { nome_produto: string; total_entradas: number; total_saidas: number; saldo_periodo: number; valor_total_financeiro_saidas: number };
 type Outflow = { nome_produto: string; quantidade_total_saida: number; valor_total_financeiro_saidas: number };
 type CategoryValue = { categoria: string; valor_total_categoria: number };
-type Tab = 'produtos' | 'relatorios';
+type Limit = { id: number; nome: string; quantidade: number; status_limite: string };
+type Tab = 'resumo' | 'produtos' | 'relatorios';
 
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const number = new Intl.NumberFormat('pt-BR');
@@ -26,7 +27,7 @@ function dateValue(firstDay = false) {
 }
 
 export default function Home() {
-  const [tab, setTab] = useState<Tab>('produtos');
+  const [tab, setTab] = useState<Tab>('resumo');
   const [products, setProducts] = useState<Product[]>([]);
   const [stock, setStock] = useState<Stock[]>([]);
   const [search, setSearch] = useState('');
@@ -42,13 +43,18 @@ export default function Home() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [outflows, setOutflows] = useState<Outflow[]>([]);
   const [categoryValues, setCategoryValues] = useState<CategoryValue[]>([]);
+  const [limits, setLimits] = useState<Limit[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadProducts = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const [productsData, stockData] = await Promise.all([api<Product[]>('/produtos'), api<Stock[]>('/produtos/estoque')]);
-      setProducts(productsData); setStock(stockData);
+      const [productsData, stockData, categoryData, limitData] = await Promise.all([
+        api<Product[]>('/produtos'), api<Stock[]>('/produtos/estoque'),
+        api<CategoryValue[]>('/produtos/valor-total-categoria'), api<Limit[]>('/produtos/limites')
+      ]);
+      setProducts(productsData); setStock(stockData); setCategoryValues(categoryData); setLimits(limitData);
     } catch (err) { setError(err instanceof Error ? err.message : 'Não foi possível carregar os produtos.'); }
     finally { setLoading(false); }
   }, []);
@@ -78,6 +84,7 @@ export default function Home() {
   const emptyCount = products.filter(product => Number(product.quantidade) === 0).length;
   const totalUnits = products.reduce((sum, product) => sum + Number(product.quantidade), 0);
   const totalValue = stock.reduce((sum, product) => sum + Number(product.valor_total), 0);
+  const maxCategoryValue = Math.max(...categoryValues.map(item => Number(item.valor_total_categoria)), 1);
 
   function notify(text: string) {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -90,29 +97,50 @@ export default function Home() {
     catch (err) { setError(err instanceof Error ? err.message : 'Não foi possível excluir o produto.'); }
   }
 
-  return <>
-    <header className="topbar">
-      <div className="page-width topbar-inner">
-        <button className="wordmark" onClick={() => setTab('produtos')}>Estoque SAEP</button>
-        <nav aria-label="Navegação principal">
-          <button className={tab === 'produtos' ? 'active' : ''} aria-current={tab === 'produtos' ? 'page' : undefined} onClick={() => setTab('produtos')}>Produtos</button>
-          <button className={tab === 'relatorios' ? 'active' : ''} aria-current={tab === 'relatorios' ? 'page' : undefined} onClick={() => setTab('relatorios')}>Relatórios</button>
-        </nav>
-      </div>
-    </header>
+  function changeTab(nextTab: Tab) { setTab(nextTab); setMenuOpen(false); }
 
-    <main className="page-width">
+  return <div className="app-shell">
+    <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
+      <button className="brand" onClick={() => changeTab('resumo')} aria-label="Estoque SAEP — início"><span className="brand-mark">ES</span><span>Estoque SAEP<small>controle inteligente</small></span></button>
+      <nav aria-label="Navegação principal">
+        <button className={tab === 'resumo' ? 'active' : ''} onClick={() => changeTab('resumo')}><span>01</span>Visão geral</button>
+        <button className={tab === 'produtos' ? 'active' : ''} onClick={() => changeTab('produtos')}><span>02</span>Produtos</button>
+        <button className={tab === 'relatorios' ? 'active' : ''} onClick={() => changeTab('relatorios')}><span>03</span>Relatórios</button>
+      </nav>
+      <div className="sidebar-status"><i /><div><strong>Sistema online</strong><small>Dados em tempo real</small></div></div>
+    </aside>
+
+    {menuOpen && <button className="menu-backdrop" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} />}
+    <div className="workspace">
+      <header className="topbar">
+        <button className="menu-button" onClick={() => setMenuOpen(true)} aria-label="Abrir menu">☰</button>
+        <div><p className="eyebrow">PAINEL DE CONTROLE</p><h1>{tab === 'resumo' ? 'Visão geral' : tab === 'produtos' ? 'Produtos' : 'Relatórios'}</h1></div>
+        <div className="top-actions"><label className="header-search"><span>Buscar</span><input value={search} onChange={event => { setSearch(event.target.value); if (event.target.value) changeTab('produtos'); }} placeholder="Produto ou categoria..." /></label><button className="primary-button" onClick={() => setEditing(null)}>Novo produto</button></div>
+      </header>
+
+      <main className="content">
       {error && <div className="error-message" role="alert"><span>{error}</span><button onClick={() => setError('')} aria-label="Fechar">×</button></div>}
 
-      {tab === 'produtos' ? <>
-        <div className="page-title"><div><h1>Produtos</h1><p>Consulte e atualize o estoque.</p></div><button className="primary-button" onClick={() => setEditing(null)}>Adicionar produto</button></div>
+      {tab === 'resumo' && <>
+        <section className="welcome-panel"><div><span className="welcome-kicker">ESTOQUE HOJE</span><h2>Seu estoque,<br />sob controle.</h2><p>Acompanhe os indicadores e mantenha cada produto no lugar certo.</p><button onClick={() => changeTab('produtos')}>Ver catálogo completo <span>→</span></button></div><div className="box-art" aria-hidden="true"><i /><i /><i /></div></section>
 
         <section className="metrics" aria-label="Resumo do estoque">
-          <div><span>Produtos</span><strong>{number.format(products.length)}</strong><small>{categories.length} {categories.length === 1 ? 'categoria' : 'categorias'}</small></div>
-          <div><span>Unidades em estoque</span><strong>{number.format(totalUnits)}</strong><small>Quantidade disponível</small></div>
-          <div><span>Valor armazenado</span><strong>{money.format(totalValue)}</strong><small>Posição atual</small></div>
-          <div className={emptyCount ? 'metric-alert' : ''}><span>Sem estoque</span><strong>{number.format(emptyCount)}</strong><small>{emptyCount ? 'Precisam de reposição' : 'Nenhuma pendência'}</small></div>
+          <div><span className="metric-index">01</span><p>Produtos cadastrados</p><strong>{number.format(products.length)}</strong><small>{categories.length} {categories.length === 1 ? 'categoria' : 'categorias'}</small></div>
+          <div><span className="metric-index">02</span><p>Itens em estoque</p><strong>{number.format(totalUnits)}</strong><small>Unidades disponíveis</small></div>
+          <div><span className="metric-index">03</span><p>Valor armazenado</p><strong>{money.format(totalValue)}</strong><small>Patrimônio atual</small></div>
+          <div className={emptyCount ? 'metric-alert' : ''}><span className="metric-index">04</span><p>Sem estoque</p><strong>{number.format(emptyCount)}</strong><small>{emptyCount ? 'Precisam de atenção' : 'Nenhuma pendência'}</small></div>
         </section>
+
+        <div className="dashboard-grid">
+          <section className="panel"><PanelHeading kicker="VISÃO RÁPIDA" title="Estoque por categoria" action="Ver relatório" onAction={() => changeTab('relatorios')} /><div className="category-bars">{categoryValues.length ? categoryValues.slice(0, 5).map(item => <div className="category-bar" key={item.categoria}><div><span>{item.categoria}</span><strong>{money.format(item.valor_total_categoria)}</strong></div><i><b style={{ width: `${Number(item.valor_total_categoria) / maxCategoryValue * 100}%` }} /></i></div>) : <Empty title="Sem categorias" text="Cadastre produtos para visualizar a distribuição." />}</div></section>
+          <section className="panel attention"><PanelHeading kicker="ATENÇÃO" title="Níveis de estoque" /><div className="attention-count">{limits.length}</div><div className="attention-list">{limits.length ? limits.slice(0, 5).map(item => <div key={item.id}><span><strong>{item.nome}</strong><small>{Number(item.quantidade) === 0 ? 'Reposição necessária' : 'Estoque elevado'}</small></span><b>{number.format(item.quantidade)} un.</b></div>) : <Empty title="Tudo certo por aqui" text="Nenhum item atingiu os limites de estoque." />}</div></section>
+        </div>
+
+        <section className="panel recent-products"><PanelHeading kicker="CATÁLOGO" title="Produtos recentes" action="Ver todos" onAction={() => changeTab('produtos')} />{loading ? <Loading /> : <ProductTable products={products.slice(-5).reverse()} compact />}</section>
+      </>}
+
+      {tab === 'produtos' && <>
+        <div className="page-title"><div><h1>Produtos</h1><p>Consulte e atualize o estoque.</p></div><button className="primary-button" onClick={() => setEditing(null)}>Adicionar produto</button></div>
 
         <section className="toolbar" aria-label="Filtros de produtos">
           <label className="search"><span className="sr-only">Buscar produto</span><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar por nome ou categoria..." /></label>
@@ -122,22 +150,29 @@ export default function Home() {
         <p className="summary"><strong>{number.format(filtered.length)}</strong> {filtered.length === 1 ? 'produto' : 'produtos'} <span>·</span> <b>{emptyCount} sem estoque</b> <span>·</span> {money.format(totalValue)} em mercadorias</p>
 
         {loading ? <Loading /> : <ProductTable products={filtered} onMove={(product, type) => setMoving({ product, type })} onEdit={setEditing} onDelete={removeProduct} />}
-      </> : <>
+      </>}
+
+      {tab === 'relatorios' && <>
         <div className="page-title"><div><h1>Relatórios</h1><p>Movimentações e valor do estoque.</p></div></div>
         <section className="report-filter"><label>Data inicial<input type="date" value={startDate} onChange={event => setStartDate(event.target.value)} /></label><label>Data final<input type="date" value={endDate} onChange={event => setEndDate(event.target.value)} /></label><button className="primary-button" onClick={loadReports} disabled={reportLoading}>{reportLoading ? 'Carregando...' : 'Atualizar'}</button></section>
         {reportLoading ? <Loading /> : <Reports categoryValues={categoryValues} outflows={outflows} movements={movements} />}
       </>}
-    </main>
+      </main>
+    </div>
 
     {editing !== undefined && <ProductModal product={editing} onClose={() => setEditing(undefined)} onSaved={async () => { setEditing(undefined); notify(editing ? 'Produto atualizado.' : 'Produto cadastrado.'); await loadProducts(); }} onError={setError} />}
     {moving && <MovementModal {...moving} onClose={() => setMoving(null)} onSaved={async () => { setMoving(null); notify(`${moving.type === 'entrada' ? 'Entrada' : 'Saída'} registrada.`); await loadProducts(); }} onError={setError} />}
     {message && <div className="toast" role="status">{message}</div>}
-  </>;
+  </div>;
 }
 
-function ProductTable({ products, onMove, onEdit, onDelete }: { products: Product[]; onMove: (product: Product, type: 'entrada' | 'saida') => void; onEdit: (product: Product) => void; onDelete: (product: Product) => void }) {
+function ProductTable({ products, onMove, onEdit, onDelete, compact = false }: { products: Product[]; onMove?: (product: Product, type: 'entrada' | 'saida') => void; onEdit?: (product: Product) => void; onDelete?: (product: Product) => void; compact?: boolean }) {
   if (!products.length) return <Empty title="Nenhum produto encontrado" text="Ajuste a busca ou adicione um produto." />;
-  return <div className="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th className="numeric">Quantidade</th><th className="numeric">Preço</th><th>Status</th><th className="actions-heading">Ações</th></tr></thead><tbody>{products.map(product => <tr key={product.id}><td data-label="Produto"><strong>{product.nome}</strong></td><td data-label="Categoria">{product.categoria}</td><td data-label="Unidade">{product.unidade_medida}</td><td data-label="Quantidade" className={`numeric ${product.quantidade === 0 ? 'zero' : ''}`}>{number.format(product.quantidade)}</td><td data-label="Preço" className="numeric">{money.format(product.valor)}</td><td data-label="Status"><span className={product.quantidade ? 'status' : 'status status-empty'}>{product.quantidade ? 'Disponível' : 'Sem estoque'}</span></td><td data-label="Ações"><div className="row-actions"><button onClick={() => onMove(product, 'entrada')}>Entrada</button><button onClick={() => onMove(product, 'saida')}>Saída</button><button onClick={() => onEdit(product)}>Editar</button><button className="delete" onClick={() => onDelete(product)}>Excluir</button></div></td></tr>)}</tbody></table></div>;
+  return <div className="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th>{!compact && <th>Unidade</th>}<th className="numeric">Quantidade</th><th className="numeric">Preço</th><th>Status</th>{!compact && <th className="actions-heading">Ações</th>}</tr></thead><tbody>{products.map(product => <tr key={product.id}><td data-label="Produto"><span className="product-name"><i>{product.nome.trim().charAt(0).toUpperCase()}</i><strong>{product.nome}</strong></span></td><td data-label="Categoria">{product.categoria}</td>{!compact && <td data-label="Unidade">{product.unidade_medida}</td>}<td data-label="Quantidade" className={`numeric ${product.quantidade === 0 ? 'zero' : ''}`}>{number.format(product.quantidade)}</td><td data-label="Preço" className="numeric">{money.format(product.valor)}</td><td data-label="Status"><span className={product.quantidade ? 'status' : 'status status-empty'}>{product.quantidade ? 'Disponível' : 'Sem estoque'}</span></td>{!compact && <td data-label="Ações"><div className="row-actions"><button onClick={() => onMove?.(product, 'entrada')}>Entrada</button><button onClick={() => onMove?.(product, 'saida')}>Saída</button><button onClick={() => onEdit?.(product)}>Editar</button><button className="delete" onClick={() => onDelete?.(product)}>Excluir</button></div></td>}</tr>)}</tbody></table></div>;
+}
+
+function PanelHeading({ kicker, title, action, onAction }: { kicker: string; title: string; action?: string; onAction?: () => void }) {
+  return <header className="panel-heading"><div><p className="eyebrow">{kicker}</p><h2>{title}</h2></div>{action && <button onClick={onAction}>{action} <span>→</span></button>}</header>;
 }
 
 function Reports({ categoryValues, outflows, movements }: { categoryValues: CategoryValue[]; outflows: Outflow[]; movements: Movement[] }) {

@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import './globals.css';
-import './polish.css';
-import './theme.css';
+import './first-front.css';
 
 export const metadata: Metadata = {
   title: 'Estoque SAEP',
