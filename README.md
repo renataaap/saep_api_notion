@@ -16,7 +16,7 @@ Projeto Node.js, Express e MySQL adaptado ao documento do Notion fornecido.
 4. Se quiser inserir dados de teste, execute `database/dados-exemplo.sql` apenas uma vez, em um banco vazio.
 5. Copie `.env.example` para `.env` e ajuste `DB_PASSWORD` e `DB_PORT` para a sua instalação do MySQL. O exemplo usa porta 3307, como o projeto enviado; se seu MySQL usa 3306, altere para 3306.
 6. Execute `npm run dev` ou `npm start`.
-7. Abra `http://localhost:3000/`.
+7. Abra `http://localhost:3000/app/` para usar o painel web. O endpoint `http://localhost:3000/` continua exibindo o status da API.
 
 A API utiliza o banco `estoque_saep` descrito no Notion. O banco antigo `estoque_db`, do arquivo enviado, usa identificadores diferentes e não é convertido automaticamente. O script `schema.sql` não apaga bancos ou registros já existentes.
 

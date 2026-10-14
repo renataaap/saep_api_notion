@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS estoque_saep CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE estoque_saep;
+CREATE DATABASE IF NOT EXISTS saep_dvn CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE saep_dvn;
 
 CREATE TABLE IF NOT EXISTS produtos (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

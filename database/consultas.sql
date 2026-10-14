@@ -1,4 +1,4 @@
-USE estoque_saep;
+USE saep_dvn;
 
 SELECT * FROM produtos;
 
